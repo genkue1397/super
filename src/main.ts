@@ -135,14 +135,12 @@ const main = async () => {
     const editorUI = new EditorUI(events);
 
     // create the graphics device
-    // @ts-ignore
     const graphicsDevice = await createGraphicsDevice(editorUI.canvas, {
         deviceTypes: ['webgl2'],
-        antialias: true,
-        alpha: false,
-        depth: true,
+        antialias: false,
+        depth: false,
         stencil: false,
-        preserveDrawingBuffer: false,
+        xrCompatible: false,
         powerPreference: 'high-performance'
     });
 
