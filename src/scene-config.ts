@@ -32,9 +32,9 @@ const sceneConfig = {
         maxPolarAngle: Math.PI,
         minZoom: 1e-6,
         maxZoom: 10.0,
-        initialAzim: -45,
-        initialElev: -10,
-        initialZoom: 1.0,
+        initialAzim: -135,
+        initialElev: -35,
+        initialZoom: 8.66,
         orbitSensitivity: 0.3,
         zoomSensitivity: 0.4
     },

@@ -2,6 +2,8 @@ import { Asset, AssetRegistry, GSplatData, GSplatResource } from 'playcanvas';
 
 import { AssetSource } from './asset-source';
 
+import { localize } from '../ui/localization';
+
 let assetId = 0;
 
 // use the engine to load a gsplat asset (ply, compressed.ply, sog, sog-bundle)
@@ -59,14 +61,14 @@ const loadGsplat = (assets: AssetRegistry, assetSource: AssetSource) => {
             const splatData = (asset.resource as GSplatResource).gsplatData as GSplatData;
             const missing = required.filter(x => !splatData.getProp(x));
             if (missing.length > 0) {
-                reject(new Error(`This file does not contain gaussian splatting data. The following properties are missing: ${missing.join(', ')}`));
+                reject(new Error(localize('popup.error.ply-parse', { error: `Missing properties: ${missing.join(', ')}` })));
             } else {
                 resolve(asset);
             }
         });
 
         asset.on('error', (err: string) => {
-            reject(err);
+            reject(new Error(localize('popup.error.generic', { error: err })));
         });
 
         assets.add(asset);

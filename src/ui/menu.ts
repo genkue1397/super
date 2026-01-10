@@ -138,10 +138,10 @@ class Menu extends Container {
             isEnabled: () => !events.invoke('scene.empty'),
             onSelect: () => events.invoke('scene.export', 'obj')
         }, {
-            text: 'FBX (.fbx)',
+            text: 'glTF (.glb)',
             icon: createSvg(sceneExport),
             isEnabled: () => !events.invoke('scene.empty'),
-            onSelect: () => events.invoke('scene.export', 'fbx')
+            onSelect: () => events.invoke('scene.export', 'gltf')
         }, {
             // separator
         }, {

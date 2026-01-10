@@ -4,6 +4,8 @@ import { AppBase, Entity, Asset } from 'playcanvas';
 import { AssetSource } from './asset-source';
 import { ThreeToPlayCanvas } from './three-converter';
 
+import { localize } from '../ui/localization';
+
 const loader = new OBJLoader();
 
 export const loadObj = async (app: AppBase, source: AssetSource): Promise<Entity> => {
@@ -15,7 +17,7 @@ export const loadObj = async (app: AppBase, source: AssetSource): Promise<Entity
             const entity = ThreeToPlayCanvas.convert(group, app);
             resolve(entity);
         } catch (e) {
-            reject(e);
+            reject(new Error(localize('popup.error.obj-parse', { error: e.message })));
         }
     });
 };

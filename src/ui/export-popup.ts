@@ -358,7 +358,8 @@ class ExportPopup extends Container {
                 sog: [splatsRow, bandsRow, iterationsRow, filenameRow],
                 viewer: [viewerTypeRow, startRow, animationRow, colorRow, fovRow, splatsRow, bandsRow, filenameRow],
                 obj: [splatsRow, filenameRow],
-                fbx: [splatsRow, filenameRow]
+                gltf: [splatsRow, filenameRow],
+                dxf: [splatsRow, filenameRow]
             }[exportType];
 
             allRows.forEach((r) => {
@@ -402,8 +403,11 @@ class ExportPopup extends Container {
                 case 'obj':
                     updateExtension('.obj');
                     break;
-                case 'fbx':
-                    updateExtension('.fbx');
+                case 'gltf':
+                    updateExtension('.glb');
+                    break;
+                case 'dxf':
+                    updateExtension('.dxf');
                     break;
             }
 
@@ -478,7 +482,15 @@ class ExportPopup extends Container {
                 };
             };
 
-            const assembleFbxOptions = (): SceneExportOptions => {
+            const assembleGltfOptions = (): SceneExportOptions => {
+                return {
+                    filename: filenameEntry.value,
+                    splatIdx: splatsSelect.value === 'all' ? 'all' : splatsSelect.value,
+                    serializeSettings: {}
+                };
+            };
+
+            const assembleDxfOptions = (): SceneExportOptions => {
                 return {
                     filename: filenameEntry.value,
                     splatIdx: splatsSelect.value === 'all' ? 'all' : splatsSelect.value,
@@ -591,8 +603,11 @@ class ExportPopup extends Container {
                         case 'obj':
                             resolve(assembleObjOptions());
                             break;
-                        case 'fbx':
-                            resolve(assembleFbxOptions());
+                        case 'gltf':
+                            resolve(assembleGltfOptions());
+                            break;
+                        case 'dxf':
+                            resolve(assembleDxfOptions());
                             break;
                     }
                 };

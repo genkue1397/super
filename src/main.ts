@@ -98,7 +98,7 @@ const initShortcuts = (events: Events) => {
     shortcuts.register(['BracketRight'], { event: 'tool.brushSelection.bigger' });
     shortcuts.register(['KeyZ'], { event: 'edit.undo', ctrl: true, capture: true });
     shortcuts.register(['KeyZ'], { event: 'edit.redo', ctrl: true, shift: true, capture: true });
-    shortcuts.register(['KeyM'], { event: 'camera.toggleMode' });
+    shortcuts.register(['KeyM'], { event: 'view.toggleRenderMode' });
     shortcuts.register(['KeyV'], { event: 'camera.toggleControlMode' });
     shortcuts.register(['Space'], { event: 'camera.toggleOverlay' });
     shortcuts.register(['KeyD'], { event: 'dataPanel.toggle', alt: true });
@@ -135,12 +135,14 @@ const main = async () => {
     const editorUI = new EditorUI(events);
 
     // create the graphics device
+    // @ts-ignore
     const graphicsDevice = await createGraphicsDevice(editorUI.canvas, {
         deviceTypes: ['webgl2'],
         antialias: true,
-        depth: false,
+        alpha: false,
+        depth: true,
         stencil: false,
-        xrCompatible: false,
+        preserveDrawingBuffer: false,
         powerPreference: 'high-performance'
     });
 

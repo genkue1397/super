@@ -21,10 +21,11 @@ const localizeInit = () => {
 
 interface LocalizeOptions {
     ellipsis?: boolean;
+    [key: string]: any;
 }
 
 const localize = (key: string, options?: LocalizeOptions): string => {
-    let text = i18next.t(key);
+    let text = i18next.t(key, options) as string;
 
     if (options?.ellipsis) text += '...';
 

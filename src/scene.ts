@@ -44,7 +44,7 @@ class Scene {
     lockedRenderMode = false;
     lockedRender = false;
 
-    canvasResize: {width: number; height: number} | null = null;
+    canvasResize: { width: number; height: number } | null = null;
     targetSize = {
         width: 0,
         height: 0
@@ -214,84 +214,98 @@ class Scene {
         this.add(this.outline);
         this.underlay = new Underlay();
         this.add(this.underlay);
-    }
 
-    start() {
-        // start the app
-        this.app.start();
-    }
-
-    clear() {
-        const splats = this.getElementsByType(ElementType.splat);
-        splats.forEach((splat) => {
-            this.remove(splat);
-            (splat as Splat).destroy();
+        // handle background color changes
+        this.events.on('setBgClr', (color: Color) => {
+            this.camera.entity.camera.clearColor = color;
+            this.config.bgClr = { r: color.r, g: color.g, b: color.b, a: color.a };
         });
-    }
 
-    // add a scene element
-    add(element: Element) {
-        if (!element.scene) {
-            // add the new element
-            element.scene = this;
-            element.add();
-            this.elements.push(element);
-
-            // notify all elements of scene addition
-            this.forEachElement(e => e !== element && e.onAdded(element));
-
-            // notify listeners
-            this.events.fire('scene.elementAdded', element);
+        // set initial clear color to transparent if using gradient, or config color
+        // For now, we default to transparent to show CSS gradient, unless config says otherwise
+        if (this.config.bgClr.a < 1) {
+            this.camera.entity.camera.clearColor = new Color(0, 0, 0, 0);
+        } else {
+            const c = this.config.bgClr;
+            this.camera.entity.camera.clearColor = new Color(c.r, c.g, c.b, c.a);
         }
-    }
 
-    // remove an element from the scene
-    remove(element: Element) {
-        if (element.scene === this) {
-            // remove from list
-            this.elements.splice(this.elements.indexOf(element), 1);
-
-            // notify listeners
-            this.events.fire('scene.elementRemoved', element);
-
-            // notify all elements of scene removal
-            this.forEachElement(e => e.onRemoved(element));
-
-            element.remove();
-            element.scene = null;
+        start() {
+            // start the app
+            this.app.start();
         }
-    }
+
+        clear() {
+            const splats = this.getElementsByType(ElementType.splat);
+            splats.forEach((splat) => {
+                this.remove(splat);
+                (splat as Splat).destroy();
+            });
+        }
+
+        // add a scene element
+        add(element: Element) {
+            if (!element.scene) {
+                // add the new element
+                element.scene = this;
+                element.add();
+                this.elements.push(element);
+
+                // notify all elements of scene addition
+                this.forEachElement(e => e !== element && e.onAdded(element));
+
+                // notify listeners
+                this.events.fire('scene.elementAdded', element);
+            }
+        }
+
+        // remove an element from the scene
+        remove(element: Element) {
+            if (element.scene === this) {
+                // remove from list
+                this.elements.splice(this.elements.indexOf(element), 1);
+
+                // notify listeners
+                this.events.fire('scene.elementRemoved', element);
+
+                // notify all elements of scene removal
+                this.forEachElement(e => e.onRemoved(element));
+
+                element.remove();
+                element.scene = null;
+            }
+        }
 
     // get the scene bound
     get bound() {
-        if (this.boundDirty) {
-            let valid = false;
-            this.forEachElement((e) => {
-                const bound = e.worldBound;
-                if (bound) {
-                    if (!valid) {
-                        valid = true;
-                        this.boundStorage.copy(bound);
-                    } else {
-                        this.boundStorage.add(bound);
+            if (this.boundDirty) {
+                let valid = false;
+                this.forEachElement((e) => {
+                    const bound = e.worldBound;
+                    if (bound) {
+                        if (!valid) {
+                            valid = true;
+                            this.boundStorage.copy(bound);
+                        } else {
+                            this.boundStorage.add(bound);
+                        }
                     }
-                }
-            });
+                });
 
-            this.boundDirty = false;
-            this.events.fire('scene.boundChanged', this.boundStorage);
+                this.boundDirty = false;
+                this.events.fire('scene.boundChanged', this.boundStorage);
+            }
+
+            return this.boundStorage;
         }
 
-        return this.boundStorage;
-    }
-
-    getElementsByType(elementType: ElementType) {
-        return this.elements.filter(e => e.type === elementType);
-    }
+        getElementsByType(elementType: ElementType) {
+            return this.elements.filter(e => e.type === elementType);
+        }
 
     get graphicsDevice() {
-        return this.app.graphicsDevice;
-    }
+            return this.app.graphicsDevice;
+        }
 
     private forEachElement(action: (e: Element) => void) {
         this.elements.forEach(action);

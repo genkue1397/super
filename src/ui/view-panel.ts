@@ -308,7 +308,7 @@ class ViewPanel extends Container {
         });
 
         const renderModeLabel = new Label({
-            text: 'Render Mode', // TODO: Localize
+            text: localize('panel.view-options.render-mode'),
             class: 'view-panel-row-label'
         });
 
@@ -316,8 +316,8 @@ class ViewPanel extends Container {
             class: 'view-panel-row-select',
             defaultValue: 'splat',
             options: [
-                { v: 'splat', t: 'Splat' },
-                { v: 'point', t: 'Point Cloud' }
+                { v: 'splat', t: localize('panel.view-options.render-mode.splat') },
+                { v: 'point', t: localize('panel.view-options.render-mode.point-cloud') }
             ]
         });
 
@@ -512,6 +512,14 @@ class ViewPanel extends Container {
         tooltips.register(selectedClrPicker, localize('panel.view-options.selected-color'), 'top');
         tooltips.register(unselectedClrPicker, localize('panel.view-options.unselected-color'), 'top');
         tooltips.register(lockedClrPicker, localize('panel.view-options.locked-color'), 'top');
+
+        // handle toggle shortcut
+        events.on('view.toggleRenderMode', () => {
+            const current = renderModeSelect.value;
+            const next = current === 'splat' ? 'point' : 'splat';
+            renderModeSelect.value = next;
+            events.fire('view.setRenderMode', next);
+        });
     }
 }
 

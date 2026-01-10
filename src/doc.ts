@@ -6,6 +6,7 @@ import { ZipWriter } from './serialize/zip-writer';
 import { Splat } from './splat';
 import { serializePly } from './splat-serialize';
 import { Transform } from './transform';
+import { ProjectFile } from './project';
 import { localize } from './ui/localization';
 
 // ts compiler and vscode find this type, but eslint does not
@@ -151,8 +152,9 @@ const registerDocEvents = (scene: Scene, events: Events) => {
         try {
             const splats = events.invoke('scene.allSplats') as Splat[];
 
-            const document = {
+            const document: ProjectFile = {
                 version: 0,
+                created: new Date().toISOString(),
                 camera: scene.camera.docSerialize(),
                 view: events.invoke('docSerialize.view'),
                 poseSets: events.invoke('docSerialize.poseSets'),

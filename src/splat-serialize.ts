@@ -24,7 +24,7 @@ import { serializeSog as serializeSogInternal } from './sog/serialize-sog';
 import { Splat } from './splat';
 import { State } from './splat-state';
 
-type SerializeSettings = {
+export type SerializeSettings = {
     maxSHBands?: number;            // specifies the maximum number of bands to be exported
     selected?: boolean;             // only export selected gaussians. used for copy/paste
     minOpacity?: number;            // filter out gaussians with alpha less than or equal to minAlpha
@@ -1340,7 +1340,6 @@ export {
     serializeFbx,
     AnimTrack,
     ExperienceSettings,
-    SerializeSettings,
     SogSettings,
     ViewerExportSettings
 };

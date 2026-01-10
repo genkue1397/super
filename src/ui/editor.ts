@@ -71,6 +71,7 @@ class EditorUI {
         // canvas
         const canvas = document.createElement('canvas');
         canvas.id = 'canvas';
+        canvas.style.backgroundImage = 'linear-gradient(135deg, #333 0%, #111 100%)';
 
         // app label
         const appLabel = new Label({

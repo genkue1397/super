@@ -1,6 +1,7 @@
 import path from 'path';
 
 import alias from '@rollup/plugin-alias';
+import commonjs from '@rollup/plugin-commonjs';
 import image from '@rollup/plugin-image';
 import json from '@rollup/plugin-json';
 import resolve from '@rollup/plugin-node-resolve';
@@ -73,6 +74,9 @@ const application = {
         typescript({
             tsconfig: './tsconfig.json'
         }),
+        commonjs({
+            include: 'node_modules/**'
+        }),
         resolve(),
         image({ dom: false }),
         json(),
@@ -81,8 +85,8 @@ const application = {
             runtime: sass,
             processor: (css) => {
                 return postcss([autoprefixer])
-                .process(css, { from: undefined })
-                .then(result => result.css);
+                    .process(css, { from: undefined })
+                    .then(result => result.css);
             },
             fileName: 'index.css',
             includePaths: [`${PCUI_DIR}/dist`],
