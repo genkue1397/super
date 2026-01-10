@@ -13,12 +13,7 @@
     ],
     "license": "MIT",
     "main": "index.js",
-    "dependencies": {
-        "dxf-parser": "^1.1.2",
-        "three": "^0.172.0"
-    },
     "scripts": {
-        "start": "cross-env BUILD_TYPE=debug concurrently --kill-others \"npm run watch\" \"serve dist -C -l 8080\"",
         "build": "rollup -c",
         "watch": "rollup -c -w",
         "serve": "serve dist -C",
@@ -38,7 +33,6 @@
         "@rollup/plugin-strip": "3.0.4",
         "@rollup/plugin-terser": "0.4.4",
         "@rollup/plugin-typescript": "12.3.0",
-        "@types/three": "^0.172.0",
         "@types/wicg-file-system-access": "2023.10.7",
         "@typescript-eslint/eslint-plugin": "8.52.0",
         "@typescript-eslint/parser": "8.52.0",

@@ -98,7 +98,7 @@ const initShortcuts = (events: Events) => {
     shortcuts.register(['BracketRight'], { event: 'tool.brushSelection.bigger' });
     shortcuts.register(['KeyZ'], { event: 'edit.undo', ctrl: true, capture: true });
     shortcuts.register(['KeyZ'], { event: 'edit.redo', ctrl: true, shift: true, capture: true });
-    shortcuts.register(['KeyM'], { event: 'view.toggleRenderMode' });
+    shortcuts.register(['KeyM'], { event: 'camera.toggleMode' });
     shortcuts.register(['KeyV'], { event: 'camera.toggleControlMode' });
     shortcuts.register(['Space'], { event: 'camera.toggleOverlay' });
     shortcuts.register(['KeyD'], { event: 'dataPanel.toggle', alt: true });

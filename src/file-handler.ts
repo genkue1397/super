@@ -1,27 +1,25 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { path, Quat, Vec3, AppBase } from 'playcanvas';
+import { path, Quat, Vec3 } from 'playcanvas';
 
 import { CreateDropHandler } from './drop-handler';
 import { ElementType } from './element';
 import { Events } from './events';
 import { AssetSource } from './loaders/asset-source';
+import { loadDxf } from './loaders/dxf-loader';
+import { loadFbx } from './loaders/fbx-loader';
+import { loadGsplat } from './loaders/gsplat';
+import { loadObj } from './loaders/obj-loader';
 import { Scene } from './scene';
 import { DownloadWriter, FileStreamWriter } from './serialize/writer';
 import { Splat } from './splat';
 import { serializePly, serializePlyCompressed, SerializeSettings, serializeSog, serializeSplat, serializeViewer, SogSettings, ViewerExportSettings } from './splat-serialize';
 import { localize } from './ui/localization';
-import { loadObj } from './loaders/obj-loader';
-import { loadFbx } from './loaders/fbx-loader';
-import { loadDxf } from './loaders/dxf-loader';
-import { serializeObj } from './serialize/obj-serializer';
-import { serializeGltf } from './serialize/gltf-serializer';
 
 // ts compiler and vscode find this type, but eslint does not
 type FilePickerAcceptType = unknown;
 
-type ExportType = 'ply' | 'splat' | 'sog' | 'viewer' | 'obj' | 'gltf' | 'dxf';
+type ExportType = 'ply' | 'splat' | 'sog' | 'viewer';
 
-type FileType = 'ply' | 'compressedPly' | 'splat' | 'sog' | 'htmlViewer' | 'packageViewer' | 'obj' | 'gltf' | 'dxf';
+type FileType = 'ply' | 'compressedPly' | 'splat' | 'sog' | 'htmlViewer' | 'packageViewer';
 
 interface SceneExportOptions {
     filename: string;
@@ -88,24 +86,6 @@ const filePickerTypes: { [key: string]: FilePickerAcceptType } = {
         accept: {
             'application/zip': ['.zip']
         }
-    },
-    'obj': {
-        description: 'Wavefront OBJ',
-        accept: {
-            'model/obj': ['.obj']
-        }
-    },
-    'fbx': {
-        description: 'Autodesk FBX',
-        accept: {
-            'application/octet-stream': ['.fbx']
-        }
-    },
-    'dxf': {
-        description: 'Drawing Exchange Format',
-        accept: {
-            'application/dxf': ['.dxf']
-        }
     }
 };
 
@@ -116,9 +96,11 @@ const allImportTypes = {
         'application/x-gaussian-splat': ['.json', '.sog', '.splat'],
         'image/webp': ['.webp'],
         'application/json': ['.lcc'],
-        'application/octet-stream': ['.bin', '.fbx', '.obj'],
-        'application/dxf': ['.dxf'],
-        'text/plain': ['.txt', '.obj', '.dxf']
+        'application/octet-stream': ['.bin'],
+        'text/plain': ['.txt'],
+        'model/obj': ['.obj'],
+        'model/fbx': ['.fbx'],
+        'application/dxf': ['.dxf']
     }
 };
 
@@ -271,42 +253,27 @@ const initFileHandler = (scene: Scene, events: Events, dropTarget: HTMLElement) 
     // import a single file, .ply, .splat or meta.json
     const importFile = async (file: ImportFile, animationFrame: boolean) => {
         try {
-            // handle custom types
-            const fname = file.filename.toLowerCase();
-            if (fname.endsWith('.obj')) {
-                const model = await loadObj(scene.app, {
-                    filename: file.filename,
-                    contents: file.contents ? await file.contents.arrayBuffer() : await (await fetch(file.url)).arrayBuffer()
-                });
-                scene.app.root.addChild(model);
-                return model;
-            } else if (fname.endsWith('.fbx')) {
-                const model = await loadFbx(scene.app, {
-                    filename: file.filename,
-                    contents: file.contents ? await file.contents.arrayBuffer() : await (await fetch(file.url)).arrayBuffer()
-                });
-                scene.app.root.addChild(model);
-                return model;
-            } else if (fname.endsWith('.dxf')) {
-                const model = await loadDxf(scene.app, {
-                    filename: file.filename,
-                    contents: file.contents ? await file.contents.arrayBuffer() : await (await fetch(file.url)).arrayBuffer()
-                });
-                scene.app.root.addChild(model);
-                return model;
-            }
+            const filename = file.filename.toLowerCase();
+            let model;
 
-            const model = await scene.assetLoader.load({
-                contents: file.contents,
-                filename: file.filename,
-                url: file.url,
-                animationFrame
-            });
+            if (filename.endsWith('.obj')) {
+                model = await loadObj(scene.app, { contents: file.contents, filename: file.filename });
+            } else if (filename.endsWith('.fbx')) {
+                model = await loadFbx(scene.app, { contents: file.contents, filename: file.filename });
+            } else if (filename.endsWith('.dxf')) {
+                model = await loadDxf(scene.app, { contents: file.contents, filename: file.filename });
+            } else {
+                model = await scene.assetLoader.load({
+                    contents: file.contents,
+                    filename: file.filename,
+                    url: file.url,
+                    animationFrame
+                });
+            }
             scene.add(model);
             return model;
         } catch (error) {
             await showLoadError(error.message ?? error, file.filename);
-            return null;
         }
     };
 
@@ -411,7 +378,7 @@ const initFileHandler = (scene: Scene, events: Events, dropTarget: HTMLElement) 
                     // load ssproj document
                     await events.invoke('doc.load', files[i].contents ?? (await fetch(files[i].url)).arrayBuffer(), files[i].handle);
                 } else if (['.ply', '.splat', '.sog', '.obj', '.fbx', '.dxf'].some(ext => filename.endsWith(ext))) {
-                    // load gaussian splat model OR obj/fbx/dxf
+                    // load gaussian splat model
                     result.push(await importFile(files[i], animationFrame));
                 } else if (filename.endsWith('images.txt')) {
                     // load colmap frames
@@ -500,10 +467,7 @@ const initFileHandler = (scene: Scene, events: Events, dropTarget: HTMLElement) 
                         filePickerTypes.splat,
                         filePickerTypes.sog,
                         filePickerTypes.lcc,
-                        filePickerTypes.indexTxt,
-                        filePickerTypes.obj,
-                        filePickerTypes.gltf,
-                        filePickerTypes.dxf
+                        filePickerTypes.indexTxt
                     ]
                 });
 
@@ -569,10 +533,7 @@ const initFileHandler = (scene: Scene, events: Events, dropTarget: HTMLElement) 
         const fileType: FileType =
             (exportType === 'viewer') ? (options.viewerExportSettings!.type === 'zip' ? 'packageViewer' : 'htmlViewer') :
                 (exportType === 'ply') ? (options.compressedPly ? 'compressedPly' : 'ply') :
-                    (exportType === 'sog') ? 'sog' :
-                        (exportType === 'obj') ? 'obj' :
-                            (exportType === 'gltf') ? 'gltf' :
-                                (exportType === 'dxf') ? 'dxf' : 'splat';
+                    (exportType === 'sog') ? 'sog' : 'splat';
 
         if (hasFilePicker) {
             try {
@@ -633,12 +594,6 @@ const initFileHandler = (scene: Scene, events: Events, dropTarget: HTMLElement) 
                     case 'htmlViewer':
                     case 'packageViewer':
                         await serializeViewer(splats, serializeSettings, viewerExportSettings!, writer);
-                        break;
-                    case 'obj':
-                        await serializeObj(splats, serializeSettings, writer);
-                        break;
-                    case 'gltf':
-                        await serializeGltf(splats, serializeSettings, writer);
                         break;
                 }
             } finally {

@@ -48,6 +48,7 @@ const application = {
         sourcemap: true
     },
     plugins: [
+        commonjs(),
         copyAndWatch({
             targets: [
                 {
@@ -73,9 +74,6 @@ const application = {
         }),
         typescript({
             tsconfig: './tsconfig.json'
-        }),
-        commonjs({
-            include: 'node_modules/**'
         }),
         resolve(),
         image({ dom: false }),

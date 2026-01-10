@@ -44,7 +44,7 @@ class Scene {
     lockedRenderMode = false;
     lockedRender = false;
 
-    canvasResize: { width: number; height: number } | null = null;
+    canvasResize: {width: number; height: number} | null = null;
     targetSize = {
         width: 0,
         height: 0
@@ -214,21 +214,6 @@ class Scene {
         this.add(this.outline);
         this.underlay = new Underlay();
         this.add(this.underlay);
-
-        // handle background color changes
-        this.events.on('setBgClr', (color: Color) => {
-            this.camera.entity.camera.clearColor = color;
-            this.config.bgClr = { r: color.r, g: color.g, b: color.b, a: color.a };
-        });
-
-        // set initial clear color to transparent if using gradient, or config color
-        // For now, we default to transparent to show CSS gradient, unless config says otherwise
-        if (this.config.bgClr.a < 1) {
-            this.camera.entity.camera.clearColor = new Color(0, 0, 0, 0);
-        } else {
-            const c = this.config.bgClr;
-            this.camera.entity.camera.clearColor = new Color(c.r, c.g, c.b, c.a);
-        }
     }
 
     start() {
