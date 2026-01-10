@@ -5,6 +5,10 @@ import { AssetSource } from './loaders/asset-source';
 import { loadGsplat } from './loaders/gsplat';
 import { loadLcc } from './loaders/lcc';
 import { loadSplat } from './loaders/splat';
+import { loadObj } from './loaders/obj-loader';
+import { loadFbx } from './loaders/fbx-loader';
+import { loadDxf } from './loaders/dxf-loader';
+import { CoordinateSystemManager } from './core/coordinate-system-manager';
 import { Splat } from './splat';
 
 const defaultOrientation = new Vec3(0, 0, 180);
@@ -49,6 +53,21 @@ class AssetLoader {
             } else if (filename.endsWith('.lcc')) {
                 asset = wrap(await loadLcc(assetSource));
                 orientation = lccOrientation;
+            } else if (filename.endsWith('.obj')) {
+                const entity = await loadObj(this.app, assetSource);
+                this.app.root.addChild(entity);
+                this.events.fire('camera.fit');
+                return null;
+            } else if (filename.endsWith('.fbx')) {
+                const entity = await loadFbx(this.app, assetSource);
+                this.app.root.addChild(entity);
+                this.events.fire('camera.fit');
+                return null;
+            } else if (filename.endsWith('.dxf')) {
+                const entity = await loadDxf(this.app, assetSource);
+                this.app.root.addChild(entity);
+                this.events.fire('camera.fit');
+                return null;
             } else {
                 asset = await loadGsplat(this.app.assets, assetSource);
             }

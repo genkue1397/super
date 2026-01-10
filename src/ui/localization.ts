@@ -4,21 +4,19 @@ import Backend from 'i18next-http-backend';
 
 const localizeInit = () => {
     return i18next
-    .use(Backend)
-    .use(LanguageDetector)
-    .init({
-        detection: {
-            order: ['querystring', /* 'cookie', 'localStorage', 'sessionStorage',*/ 'navigator', 'htmlTag']
-        },
-        backend: {
-            loadPath: './static/locales/{{lng}}.json'
-        },
-        supportedLngs: ['de', 'en', 'es', 'fr', 'ja', 'ko', 'pt-BR', 'ru', 'zh-CN'],
-        fallbackLng: 'en',
-        interpolation: {
-            escapeValue: false
-        }
-    });
+        .use(Backend)
+        .use(LanguageDetector)
+        .init({
+            lng: 'ja',
+            backend: {
+                loadPath: './static/locales/{{lng}}.json'
+            },
+            supportedLngs: ['de', 'en', 'es', 'fr', 'ja', 'ko', 'pt-BR', 'ru', 'zh-CN'],
+            fallbackLng: 'en',
+            interpolation: {
+                escapeValue: false
+            }
+        });
 };
 
 interface LocalizeOptions {

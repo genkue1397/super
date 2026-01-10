@@ -32,6 +32,12 @@ class EditHistory {
         }
         this.history.push(editOp);
         this.redo(suppressOp);
+
+        // limit history size
+        while (this.history.length > 50) {
+            this.history.shift().destroy?.();
+            this.cursor--;
+        }
     }
 
     canUndo() {

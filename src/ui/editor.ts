@@ -11,6 +11,7 @@ import { localize, localizeInit } from './localization';
 import { Menu } from './menu';
 import { ModeToggle } from './mode-toggle';
 import logo from './playcanvas-logo.png';
+import { PerformanceMonitor } from './performance-monitor';
 import { Popup, ShowOptions } from './popup';
 import { Progress } from './progress';
 import { PublishSettingsDialog } from './publish-settings-dialog';
@@ -125,6 +126,7 @@ class EditorUI {
         const rightToolbar = new RightToolbar(events, tooltips);
         const modeToggle = new ModeToggle(events, tooltips);
         const menu = new Menu(events);
+        const performanceMonitor = new PerformanceMonitor(events);
 
         canvasContainer.dom.appendChild(canvas);
         canvasContainer.append(appLabel);
@@ -137,6 +139,7 @@ class EditorUI {
         canvasContainer.append(rightToolbar);
         canvasContainer.append(modeToggle);
         canvasContainer.append(menu);
+        canvasContainer.append(performanceMonitor);
 
         // view axes container
         const viewCube = new ViewCube(events);

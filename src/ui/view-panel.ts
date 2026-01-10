@@ -302,7 +302,53 @@ class ViewPanel extends Container {
         showBoundRow.append(showBoundLabel);
         showBoundRow.append(showBoundToggle);
 
+        // render mode
+        const renderModeRow = new Container({
+            class: 'view-panel-row'
+        });
+
+        const renderModeLabel = new Label({
+            text: 'Render Mode', // TODO: Localize
+            class: 'view-panel-row-label'
+        });
+
+        const renderModeSelect = new SelectInput({
+            class: 'view-panel-row-select',
+            defaultValue: 'splat',
+            options: [
+                { v: 'splat', t: 'Splat' },
+                { v: 'point', t: 'Point Cloud' }
+            ]
+        });
+
+        renderModeRow.append(renderModeLabel);
+        renderModeRow.append(renderModeSelect);
+
+        // coordinate system
+        const coordSysRow = new Container({
+            class: 'view-panel-row'
+        });
+
+        const coordSysLabel = new Label({
+            text: 'Coordinate System', // TODO: Localize
+            class: 'view-panel-row-label'
+        });
+
+        const coordSysSelect = new SelectInput({
+            class: 'view-panel-row-select',
+            defaultValue: 'y-up',
+            options: [
+                { v: 'y-up', t: 'Y-Up' },
+                { v: 'z-up', t: 'Z-Up' }
+            ]
+        });
+
+        coordSysRow.append(coordSysLabel);
+        coordSysRow.append(coordSysSelect);
+
         this.append(header);
+        this.append(renderModeRow);
+        this.append(coordSysRow);
         this.append(clrRow);
         this.append(tonemappingRow);
         this.append(fovRow);
@@ -401,6 +447,16 @@ class ViewPanel extends Container {
 
         showBoundToggle.on('change', () => {
             events.fire('camera.setBound', showBoundToggle.value);
+        });
+
+        // render mode
+        renderModeSelect.on('change', (value: string) => {
+            events.fire('view.setRenderMode', value);
+        });
+
+        // coordinate system
+        coordSysSelect.on('change', (value: string) => {
+            events.fire('view.setCoordinateSystem', value);
         });
 
         // high precision (render to float)

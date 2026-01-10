@@ -1,4 +1,4 @@
-import { Container, Label, Element as PcuiElement, TextInput } from '@playcanvas/pcui';
+import { Container, Label, Element as PcuiElement, TextInput, SliderInput } from '@playcanvas/pcui';
 
 import { SplatRenameOp } from '../edit-ops';
 import { Element, ElementType } from '../element';
@@ -21,6 +21,8 @@ class SplatItem extends Container {
     getVisible: () => boolean;
     setVisible: (value: boolean) => void;
     destroy: () => void;
+    getOpacity: () => number;
+    setOpacity: (value: number) => void;
 
     constructor(name: string, edit: TextInput, args = {}) {
         args = {
@@ -51,10 +53,34 @@ class SplatItem extends Container {
             class: 'splat-item-delete'
         });
 
+        const opacity = new SliderInput({
+            class: 'splat-item-opacity',
+            min: 0,
+            max: 1,
+            precision: 2,
+            value: 1
+        });
+
+
         this.append(text);
+        this.append(opacity);
         this.append(visible);
         this.append(invisible);
         this.append(remove);
+
+        this.getOpacity = () => {
+            return opacity.value;
+        };
+
+        this.setOpacity = (value: number) => {
+            if (value !== opacity.value) {
+                opacity.value = value;
+            }
+        };
+
+        opacity.on('change', (value: number) => {
+            this.emit('opacity', value);
+        });
 
         this.getName = () => {
             return text.value;
@@ -162,6 +188,14 @@ class SplatItem extends Container {
     get visible() {
         return this.getVisible();
     }
+
+    set opacity(value: number) {
+        this.setOpacity(value);
+    }
+
+    get opacity() {
+        return this.getOpacity();
+    }
 }
 
 class SplatList extends Container {
@@ -201,6 +235,11 @@ class SplatList extends Container {
                 item.on('rename', (value: string) => {
                     events.fire('edit.add', new SplatRenameOp(splat, value));
                 });
+                item.on('opacity', (value: number) => {
+                    splat.transparency = value;
+                });
+
+                item.opacity = splat.transparency;
             }
         });
 
@@ -232,6 +271,13 @@ class SplatList extends Container {
             const item = items.get(splat);
             if (item) {
                 item.visible = splat.visible;
+            }
+        });
+
+        events.on('splat.transparency', (splat: Splat) => {
+            const item = items.get(splat);
+            if (item) {
+                item.opacity = splat.transparency;
             }
         });
 

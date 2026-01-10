@@ -356,7 +356,9 @@ class ExportPopup extends Container {
                 ply: [compressRow, splatsRow, bandsRow, filenameRow],
                 splat: [splatsRow, filenameRow],
                 sog: [splatsRow, bandsRow, iterationsRow, filenameRow],
-                viewer: [viewerTypeRow, startRow, animationRow, colorRow, fovRow, splatsRow, bandsRow, filenameRow]
+                viewer: [viewerTypeRow, startRow, animationRow, colorRow, fovRow, splatsRow, bandsRow, filenameRow],
+                obj: [splatsRow, filenameRow],
+                fbx: [splatsRow, filenameRow]
             }[exportType];
 
             allRows.forEach((r) => {
@@ -397,6 +399,12 @@ class ExportPopup extends Container {
                 case 'viewer':
                     updateExtension(viewerTypeSelect.value === 'html' ? '.html' : '.zip');
                     break;
+                case 'obj':
+                    updateExtension('.obj');
+                    break;
+                case 'fbx':
+                    updateExtension('.fbx');
+                    break;
             }
 
             // viewer
@@ -406,7 +414,7 @@ class ExportPopup extends Container {
             startSelect.disabledOptions = hasPoses ? {} : { 'pose': startSelect.options[2].t };
 
             animationSelect.value = hasPoses ? 'track' : 'none';
-            animationSelect.disabledOptions = hasPoses ? { } : { track: animationSelect.options[1].t };
+            animationSelect.disabledOptions = hasPoses ? {} : { track: animationSelect.options[1].t };
             animationSelect.enabled = hasPoses;
 
             colorPicker.value = [bgClr.r, bgClr.g, bgClr.b];
@@ -419,9 +427,9 @@ class ExportPopup extends Container {
             const frameRate = events.invoke('timeline.frameRate');
             const smoothness = events.invoke('timeline.smoothness');
             const orderedPoses = (events.invoke('camera.poses') as Pose[])
-            .slice()
-            .filter(p => p.frame >= 0 && p.frame < frames)
-            .sort((a, b) => a.frame - b.frame);
+                .slice()
+                .filter(p => p.frame >= 0 && p.frame < frames)
+                .sort((a, b) => a.frame - b.frame);
 
             reset(exportType, splatNames, orderedPoses.length > 0);
 
@@ -432,7 +440,7 @@ class ExportPopup extends Container {
             this.dom.addEventListener('keydown', keydown);
             this.dom.focus();
 
-            const assemblePlyOptions = () : SceneExportOptions => {
+            const assemblePlyOptions = (): SceneExportOptions => {
                 return {
                     filename: filenameEntry.value,
                     splatIdx: splatsSelect.value === 'all' ? 'all' : splatsSelect.value,
@@ -443,15 +451,15 @@ class ExportPopup extends Container {
                 };
             };
 
-            const assembleSplatOptions = () : SceneExportOptions => {
+            const assembleSplatOptions = (): SceneExportOptions => {
                 return {
                     filename: filenameEntry.value,
                     splatIdx: splatsSelect.value === 'all' ? 'all' : splatsSelect.value,
-                    serializeSettings: { }
+                    serializeSettings: {}
                 };
             };
 
-            const assembleSogOptions = () : SceneExportOptions => {
+            const assembleSogOptions = (): SceneExportOptions => {
                 return {
                     filename: filenameEntry.value,
                     splatIdx: splatsSelect.value === 'all' ? 'all' : splatsSelect.value,
@@ -462,7 +470,23 @@ class ExportPopup extends Container {
                 };
             };
 
-            const assembleViewerOptions = () : SceneExportOptions => {
+            const assembleObjOptions = (): SceneExportOptions => {
+                return {
+                    filename: filenameEntry.value,
+                    splatIdx: splatsSelect.value === 'all' ? 'all' : splatsSelect.value,
+                    serializeSettings: {}
+                };
+            };
+
+            const assembleFbxOptions = (): SceneExportOptions => {
+                return {
+                    filename: filenameEntry.value,
+                    splatIdx: splatsSelect.value === 'all' ? 'all' : splatsSelect.value,
+                    serializeSettings: {}
+                };
+            };
+
+            const assembleViewerOptions = (): SceneExportOptions => {
                 // extract camera starting pos
                 let pose;
                 switch (startSelect.value) {
@@ -563,6 +587,12 @@ class ExportPopup extends Container {
                             break;
                         case 'viewer':
                             resolve(assembleViewerOptions());
+                            break;
+                        case 'obj':
+                            resolve(assembleObjOptions());
+                            break;
+                        case 'fbx':
+                            resolve(assembleFbxOptions());
                             break;
                     }
                 };

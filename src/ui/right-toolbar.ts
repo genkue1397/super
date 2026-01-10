@@ -60,6 +60,27 @@ class RightToolbar extends Container {
             class: 'right-toolbar-button'
         });
 
+        // Camera Presets
+        const createPresetBtn = (id: string, text: string, align: string, tooltipKey: string) => {
+            const btn = new Button({
+                id: `right-toolbar-camera-${id}`,
+                class: 'right-toolbar-button',
+                text: text
+            });
+            btn.style.fontSize = '12px';
+            btn.style.fontWeight = 'bold';
+            btn.on('click', () => events.fire('camera.align', align));
+            tooltips.register(btn, localize(tooltipKey), 'left');
+            return btn;
+        };
+
+        const presetFront = createPresetBtn('front', 'F', 'pz', 'tooltip.camera.front');
+        const presetBack = createPresetBtn('back', 'B', 'nz', 'tooltip.camera.back');
+        const presetLeft = createPresetBtn('left', 'L', 'nx', 'tooltip.camera.left');
+        const presetRight = createPresetBtn('right', 'R', 'px', 'tooltip.camera.right');
+        const presetTop = createPresetBtn('top', 'T', 'py', 'tooltip.camera.top');
+        const presetBottom = createPresetBtn('bottom', 'Bt', 'ny', 'tooltip.camera.bottom');
+
         const colorPanel = new Button({
             id: 'right-toolbar-color-panel',
             class: 'right-toolbar-toggle'
@@ -92,6 +113,13 @@ class RightToolbar extends Container {
         this.append(new Element({ class: 'right-toolbar-separator' }));
         this.append(cameraFrameSelection);
         this.append(cameraReset);
+        this.append(new Element({ class: 'right-toolbar-separator' }));
+        this.append(presetFront);
+        this.append(presetBack);
+        this.append(presetLeft);
+        this.append(presetRight);
+        this.append(presetTop);
+        this.append(presetBottom);
         this.append(new Element({ class: 'right-toolbar-separator' }));
         this.append(colorPanel);
         this.append(options);

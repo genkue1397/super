@@ -17,7 +17,9 @@ import {
     Quat,
     Texture,
     Vec3,
-    MeshInstance
+    MeshInstance,
+    Mesh,
+    StandardMaterial
 } from 'playcanvas';
 
 import { Element, ElementType } from './element';
@@ -172,7 +174,8 @@ class Splat extends Element {
             glsl.set('gsplatPS', fragmentShader);
             glsl.set('gsplatCenterVS', gsplatCenter);
 
-            material.setDefine('SH_BANDS', `${Math.min(bands, (instance.resource as GSplatResource).shBands)}`);
+            const maxBands = this.numSplats > 1000000 ? 0 : (instance.resource as GSplatResource).shBands;
+            material.setDefine('SH_BANDS', `${Math.min(bands, maxBands)}`);
             material.setParameter('splatState', this.stateTexture);
             material.setParameter('splatTransform', this.transformTexture);
             material.update();
@@ -190,6 +193,114 @@ class Splat extends Element {
         instance.sorter.on('updated', () => {
             this.changedCounter++;
         });
+
+        // Listen to render mode changes
+        this.scene.events.on('view.setRenderMode', (mode: 'splat' | 'point') => {
+            this.renderMode = mode;
+        });
+
+        this.createPointCloud();
+    }
+
+    pointCloudEntity: Entity;
+    _renderMode: 'splat' | 'point' = 'splat';
+
+    createPointCloud() {
+        if (this.pointCloudEntity) return;
+
+        const splatData = this.splatData;
+        const numSplats = splatData.numSplats;
+
+        // We need raw positions. 
+        // GSplatData usually stores them in 'vertex' element.
+        // But formatting varies. 
+        // We can use the 'centers' from the instance sorter if initialized, or calcPositions.
+        // Sorter centers are updated in updatePositions.
+
+        // Let's use calcPositions from dataProcessor to be safe/consistent
+        const data = this.scene.dataProcessor.calcPositions(this);
+        // data array is float32, x,y,z, (maybe w?)
+        // updatePositions says: data[i*4]... so stride is 4.
+
+        const positions = new Float32Array(numSplats * 3);
+        const colors = new Uint8ClampedArray(numSplats * 4); // r,g,b,a
+
+        // We also need colors. GSplatData has f_dc_0, f_dc_1, f_dc_2 usually relative to SH.
+        // Or we can just use white if SH is complex.
+        // Actually, for point cloud mode, we want the base color.
+        // Accessing SH 0 band (diffuse).
+        // It's complex to extract exactly without SH eval.
+        // For MVP, let's use a default color or try to fetch 'f_dc_0' etc.
+        // splatData.getProp('f_dc_0') ?
+
+        const f_dc_0 = splatData.getProp('f_dc_0');
+        const f_dc_1 = splatData.getProp('f_dc_1');
+        const f_dc_2 = splatData.getProp('f_dc_2');
+
+        const SH_C0 = 0.28209479177387814;
+
+        for (let i = 0; i < numSplats; i++) {
+            positions[i * 3 + 0] = data[i * 4 + 0];
+            positions[i * 3 + 1] = data[i * 4 + 1];
+            positions[i * 3 + 2] = data[i * 4 + 2];
+
+            if (f_dc_0 && f_dc_1 && f_dc_2) {
+                // SH to RGB (approx)
+                let r = f_dc_0[i] * SH_C0 + 0.5;
+                let g = f_dc_1[i] * SH_C0 + 0.5;
+                let b = f_dc_2[i] * SH_C0 + 0.5;
+
+                // simple clamping
+                r = Math.max(0, Math.min(1, r)) * 255;
+                g = Math.max(0, Math.min(1, g)) * 255;
+                b = Math.max(0, Math.min(1, b)) * 255;
+
+                colors[i * 4 + 0] = r;
+                colors[i * 4 + 1] = g;
+                colors[i * 4 + 2] = b;
+                colors[i * 4 + 3] = 255;
+            } else {
+                colors[i * 4 + 0] = 255;
+                colors[i * 4 + 1] = 255;
+                colors[i * 4 + 2] = 255;
+                colors[i * 4 + 3] = 255;
+            }
+        }
+
+        const mesh = new Mesh(this.asset.resource.device);
+        mesh.setPositions(positions);
+        mesh.setColors(colors);
+        mesh.update(this.asset.resource.device.PRIMITIVE_POINTS);
+
+        const material = new StandardMaterial();
+        material.emissiveVertexColor = true;
+        material.useLighting = false;
+
+        this.pointCloudEntity = new Entity('pointCloud');
+        this.pointCloudEntity.addComponent('render', {
+            meshInstances: [new MeshInstance(mesh, material)]
+        });
+
+        this.entity.addChild(this.pointCloudEntity);
+        this.pointCloudEntity.enabled = (this._renderMode === 'point');
+    }
+
+    set renderMode(mode: 'splat' | 'point') {
+        if (this._renderMode !== mode) {
+            this._renderMode = mode;
+            if (mode === 'point') {
+                if (!this.pointCloudEntity) this.createPointCloud();
+                this.pointCloudEntity.enabled = true;
+                this.entity.gsplat.enabled = false;
+            } else {
+                if (this.pointCloudEntity) this.pointCloudEntity.enabled = false;
+                this.entity.gsplat.enabled = true;
+            }
+        }
+    }
+
+    get renderMode() {
+        return this._renderMode;
     }
 
     destroy() {

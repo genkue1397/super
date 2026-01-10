@@ -133,6 +133,16 @@ class Menu extends Container {
             isEnabled: () => !events.invoke('scene.empty'),
             onSelect: () => events.invoke('scene.export', 'sog')
         }, {
+            text: 'OBJ (.obj)',
+            icon: createSvg(sceneExport),
+            isEnabled: () => !events.invoke('scene.empty'),
+            onSelect: () => events.invoke('scene.export', 'obj')
+        }, {
+            text: 'FBX (.fbx)',
+            icon: createSvg(sceneExport),
+            isEnabled: () => !events.invoke('scene.empty'),
+            onSelect: () => events.invoke('scene.export', 'fbx')
+        }, {
             // separator
         }, {
             text: localize('menu.file.export.viewer', { ellipsis: true }),
@@ -259,6 +269,12 @@ class Menu extends Container {
             text: localize('menu.render.video', { ellipsis: true }),
             icon: createSvg(sceneExport),
             onSelect: async () => await events.invoke('show.videoSettingsDialog')
+        }, {
+            // separator
+        }, {
+            text: localize('menu.render.fps-monitor'),
+            icon: 'E149',
+            onSelect: () => events.fire('view.toggleFPS')
         }]);
 
         const videoTutorialsMenuPanel = new MenuPanel([{

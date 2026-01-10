@@ -26,6 +26,7 @@
     "menu.render": "レンダリング",
     "menu.render.image": "画像",
     "menu.render.video": "動画",
+    "menu.render.fps-monitor": "FPSを表示",
     "menu.help": "ヘルプ",
     "menu.help.shortcuts": "キーボードショートカット",
     "menu.help.user-guide": "ユーザーガイド",
@@ -236,5 +237,11 @@
     "tooltip.timeline.remove-key": "キーフレームを削除",
     "tooltip.timeline.frame-rate": "フレームレート",
     "tooltip.timeline.total-frames": "総フレーム数",
-    "tooltip.timeline.smoothness": "スムーズさ"
+    "tooltip.timeline.smoothness": "スムーズさ",
+    "tooltip.camera.front": "前",
+    "tooltip.camera.back": "後",
+    "tooltip.camera.left": "左",
+    "tooltip.camera.right": "右",
+    "tooltip.camera.top": "上",
+    "tooltip.camera.bottom": "下"
 }

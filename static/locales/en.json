@@ -26,6 +26,7 @@
     "menu.render": "Render",
     "menu.render.image": "Image",
     "menu.render.video": "Video",
+    "menu.render.fps-monitor": "Show FPS",
     "menu.help": "Help",
     "menu.help.shortcuts": "Keyboard Shortcuts",
     "menu.help.user-guide": "User Guide",
@@ -236,5 +237,11 @@
     "tooltip.timeline.remove-key": "Remove Key",
     "tooltip.timeline.frame-rate": "Frame Rate",
     "tooltip.timeline.total-frames": "Total Frames",
-    "tooltip.timeline.smoothness": "Smoothness"
+    "tooltip.timeline.smoothness": "Smoothness",
+    "tooltip.camera.front": "Front",
+    "tooltip.camera.back": "Back",
+    "tooltip.camera.left": "Left",
+    "tooltip.camera.right": "Right",
+    "tooltip.camera.top": "Top",
+    "tooltip.camera.bottom": "Bottom"
 }
