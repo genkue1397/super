@@ -229,83 +229,84 @@ class Scene {
             const c = this.config.bgClr;
             this.camera.entity.camera.clearColor = new Color(c.r, c.g, c.b, c.a);
         }
+    }
 
-        start() {
-            // start the app
-            this.app.start();
+    start() {
+        // start the app
+        this.app.start();
+    }
+
+    clear() {
+        const splats = this.getElementsByType(ElementType.splat);
+        splats.forEach((splat) => {
+            this.remove(splat);
+            (splat as Splat).destroy();
+        });
+    }
+
+    // add a scene element
+    add(element: Element) {
+        if (!element.scene) {
+            // add the new element
+            element.scene = this;
+            element.add();
+            this.elements.push(element);
+
+            // notify all elements of scene addition
+            this.forEachElement(e => e !== element && e.onAdded(element));
+
+            // notify listeners
+            this.events.fire('scene.elementAdded', element);
         }
+    }
 
-        clear() {
-            const splats = this.getElementsByType(ElementType.splat);
-            splats.forEach((splat) => {
-                this.remove(splat);
-                (splat as Splat).destroy();
-            });
+    // remove an element from the scene
+    remove(element: Element) {
+        if (element.scene === this) {
+            // remove from list
+            this.elements.splice(this.elements.indexOf(element), 1);
+
+            // notify listeners
+            this.events.fire('scene.elementRemoved', element);
+
+            // notify all elements of scene removal
+            this.forEachElement(e => e.onRemoved(element));
+
+            element.remove();
+            element.scene = null;
         }
-
-        // add a scene element
-        add(element: Element) {
-            if (!element.scene) {
-                // add the new element
-                element.scene = this;
-                element.add();
-                this.elements.push(element);
-
-                // notify all elements of scene addition
-                this.forEachElement(e => e !== element && e.onAdded(element));
-
-                // notify listeners
-                this.events.fire('scene.elementAdded', element);
-            }
-        }
-
-        // remove an element from the scene
-        remove(element: Element) {
-            if (element.scene === this) {
-                // remove from list
-                this.elements.splice(this.elements.indexOf(element), 1);
-
-                // notify listeners
-                this.events.fire('scene.elementRemoved', element);
-
-                // notify all elements of scene removal
-                this.forEachElement(e => e.onRemoved(element));
-
-                element.remove();
-                element.scene = null;
-            }
-        }
+    }
 
     // get the scene bound
     get bound() {
-            if (this.boundDirty) {
-                let valid = false;
-                this.forEachElement((e) => {
-                    const bound = e.worldBound;
-                    if (bound) {
-                        if (!valid) {
-                            valid = true;
-                            this.boundStorage.copy(bound);
-                        } else {
-                            this.boundStorage.add(bound);
-                        }
+        if (this.boundDirty) {
+            let valid = false;
+            this.forEachElement((e) => {
+                const bound = e.worldBound;
+                if (bound) {
+                    if (!valid) {
+                        valid = true;
+                        this.boundStorage.copy(bound);
+                    } else {
+                        this.boundStorage.add(bound);
                     }
-                });
+                }
+            });
 
-                this.boundDirty = false;
-                this.events.fire('scene.boundChanged', this.boundStorage);
-            }
-
-            return this.boundStorage;
+            this.boundDirty = false;
+            this.events.fire('scene.boundChanged', this.boundStorage);
         }
 
-        getElementsByType(elementType: ElementType) {
-            return this.elements.filter(e => e.type === elementType);
-        }
+        return this.boundStorage;
+    }
+
+    getElementsByType(elementType: ElementType) {
+        return this.elements.filter(e => e.type === elementType);
+    }
 
     get graphicsDevice() {
-            return this.app.graphicsDevice;
-        }
+        return this.app.graphicsDevice;
+    }
 
     private forEachElement(action: (e: Element) => void) {
         this.elements.forEach(action);
