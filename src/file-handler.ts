@@ -1,13 +1,12 @@
 import { path, Quat, Vec3 } from 'playcanvas';
 
+import { loadDxf } from './loaders/dxf-loader';
+import { loadFbx } from './loaders/fbx-loader';
+import { loadObj } from './loaders/obj-loader';
 import { CreateDropHandler } from './drop-handler';
 import { ElementType } from './element';
 import { Events } from './events';
 import { AssetSource } from './loaders/asset-source';
-import { loadDxf } from './loaders/dxf-loader';
-import { loadFbx } from './loaders/fbx-loader';
-import { loadGsplat } from './loaders/gsplat';
-import { loadObj } from './loaders/obj-loader';
 import { Scene } from './scene';
 import { DownloadWriter, FileStreamWriter } from './serialize/writer';
 import { Splat } from './splat';
@@ -254,22 +253,27 @@ const initFileHandler = (scene: Scene, events: Events, dropTarget: HTMLElement) 
     const importFile = async (file: ImportFile, animationFrame: boolean) => {
         try {
             const filename = file.filename.toLowerCase();
-            let model;
 
             if (filename.endsWith('.obj')) {
-                model = await loadObj(scene.app, { contents: file.contents, filename: file.filename });
+                const model = await loadObj(scene.app, { contents: file.contents, filename: file.filename });
+                scene.add(model);
+                return model;
             } else if (filename.endsWith('.fbx')) {
-                model = await loadFbx(scene.app, { contents: file.contents, filename: file.filename });
+                const model = await loadFbx(scene.app, { contents: file.contents, filename: file.filename });
+                scene.add(model);
+                return model;
             } else if (filename.endsWith('.dxf')) {
-                model = await loadDxf(scene.app, { contents: file.contents, filename: file.filename });
-            } else {
-                model = await scene.assetLoader.load({
-                    contents: file.contents,
-                    filename: file.filename,
-                    url: file.url,
-                    animationFrame
-                });
+                const model = await loadDxf(scene.app, { contents: file.contents, filename: file.filename });
+                scene.add(model);
+                return model;
             }
+
+            const model = await scene.assetLoader.load({
+                contents: file.contents,
+                filename: file.filename,
+                url: file.url,
+                animationFrame
+            });
             scene.add(model);
             return model;
         } catch (error) {
@@ -403,7 +407,7 @@ const initFileHandler = (scene: Scene, events: Events, dropTarget: HTMLElement) 
         fileSelector = document.createElement('input');
         fileSelector.setAttribute('id', 'file-selector');
         fileSelector.setAttribute('type', 'file');
-        fileSelector.setAttribute('accept', '.ply,.splat,meta.json,.json,.webp,.ssproj,.sog,.lcc,.bin,.txt,.obj,.fbx,.dxf');
+        fileSelector.setAttribute('accept', '.ply,.splat,meta.json,.json,.webp,.ssproj,.sog,.lcc,.bin,.txt');
         fileSelector.setAttribute('multiple', 'true');
 
         fileSelector.onchange = () => {
