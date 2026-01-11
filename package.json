@@ -18,7 +18,8 @@
         "build": "rollup -c",
         "watch": "rollup -c -w",
         "serve": "serve dist -C",
-        "develop": "BUILD_TYPE=debug concurrently --kill-others \"npm run watch\" \"npm run serve\"",
+        "develop": "concurrently --kill-others \"npm run watch\" \"npm run serve\"",
+        "develop:debug": "BUILD_TYPE=debug concurrently --kill-others \"npm run watch\" \"npm run serve\"",
         "lint": "eslint src"
     },
     "devDependencies": {
